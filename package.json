@@ -1,0 +1,40 @@
+{
+  "name": "simplerxjs",
+  "version": "1.0.0",
+  "description": "A Simpler RxJS",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "node_modules/.bin/gulp build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Guardiannw/SimpleRxJS.git"
+  },
+  "keywords": [
+    "Reactive",
+    "Extensions",
+    "Javascript",
+    "Ecmascript",
+    "Observable",
+    "Subscription",
+    "Rx"
+  ],
+  "author": "Nathaniel Rankin Webb",
+  "license": "SEE LICENSE IN LICENSE",
+  "bugs": {
+    "url": "https://github.com/Guardiannw/SimpleRxJS/issues"
+  },
+  "homepage": "https://github.com/Guardiannw/SimpleRxJS#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-typescript": "^2.12.0",
+    "jasmine-core": "^2.4.1",
+    "jasmine-reporters": "^2.1.1",
+    "karma": "^0.13.21",
+    "karma-chrome-launcher": "^0.2.2",
+    "karma-jasmine": "^0.3.7",
+    "karma-junit-reporter": "^0.3.8",
+    "typescript": "^1.8.2"
+  }
+}

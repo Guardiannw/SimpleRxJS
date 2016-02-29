@@ -1,0 +1,8 @@
+# Hide Webstorm files
+.idea/
+
+# Package Dependencies
+node_modules/
+
+# Builds / Compilations
+dist/
