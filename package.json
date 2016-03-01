@@ -1,6 +1,6 @@
 {
   "name": "simplerxjs",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A Simpler RxJS",
   "main": "index.js",
   "scripts": {
@@ -42,5 +42,6 @@
     "typescript": "^1.8.2",
     "typings": "^0.6.8"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "typings": "src"
 }
