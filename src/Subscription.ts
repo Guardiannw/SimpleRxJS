@@ -3,9 +3,16 @@ export interface Subscriber {
 }
 
 export class Subscription implements Subscriber{
-	constructor (private destructor: Function) { }
+	public isUnsubscribed: boolean;
+
+	constructor (private destructor: Function) {
+		this.isUnsubscribed = false;
+	}
 
 	unsubscribe () {
-		this.destructor();
+		if (!this.isUnsubscribed) {
+			this.destructor();
+			this.isUnsubscribed = true;
+		}
 	}
 }

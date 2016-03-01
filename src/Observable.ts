@@ -43,10 +43,8 @@ export class Observable implements Subscribable{
 
 	public retry (maxRetries: number = -1) {
 		return Observable.create((next, error, complete) => {
-			let self = this;
 			let subscription = null;
-
-			(function reSubscribe (err?: Error) {
+			let reSubscribe = (err?: Error) => {
 				if (subscription)
 					subscription.unsubscribe();
 				if (maxRetries === 0)
@@ -54,13 +52,72 @@ export class Observable implements Subscribable{
 				else {
 					if (maxRetries > 0)
 						maxRetries--;
-					self.subscribe(next, reSubscribe, complete);
+					this.subscribe(next, reSubscribe, complete);
 				}
-			})();
+			};
+
+			reSubscribe();
 
 			return () => {
 				subscription.unsubscribe();
 			}
 		});
+	}
+
+	public flatMap (projection: Function) {
+		return Observable.create((next, error, complete) => {
+			let innerSubscriptions: Array<Subscription> = [];
+			let subscription = this.subscribe((data?: any) => {
+				let innerSubscription = projection(data).subscribe(next, error, () => {
+					innerSubscription.unsubscribe();
+					innerSubscriptions.splice(innerSubscriptions.indexOf(innerSubscription), 1);
+				});
+				innerSubscriptions.push(innerSubscription);
+			}, error, complete);
+
+			return () => {
+				subscription.unsubscribe();
+				innerSubscriptions.filter((subscription) => !subscription.isUnsubscribed)
+					.forEach((subscription) => subscription.unsubscribe());
+			}
+		});
+	}
+
+	public exhaustMap (projection: Function) {
+		return Observable.create((next, error, complete) => {
+			let innerSubscription;
+			let subscription = this.subscribe((data?: any) => {
+				if (!innerSubscription || innerSubscription.isUnsubscribed)
+					innerSubscription = projection(data).subscribe(next, error, () => {
+						innerSubscription.unsubscribe();
+					});
+			}, error, complete);
+
+			return () => {
+				subscription.unsubscribe();
+				if (innerSubscription && !innerSubscription.isUnsubscribed)
+					innerSubscription.unsubscribe();
+			}
+		});
+	}
+
+	public switchMap (projection: Function) {
+		return Observable.create((next, error, complete) => {
+			let innerSubscription;
+			let subscription = this.subscribe((data?: any) => {
+				if (innerSubscription && !innerSubscription.isUnsubscribed)
+					innerSubscription.unsubscribe();
+				innerSubscription = projection(data).subscribe(next, error, () => {
+					innerSubscription.unsubscribe();
+				});
+			}, error, complete);
+
+			return () => {
+				subscription.unsubscribe();
+				if (innerSubscription && !innerSubscription.isUnsubscribed)
+					innerSubscription.unsubscribe();
+			}
+		});
+
 	}
 }
