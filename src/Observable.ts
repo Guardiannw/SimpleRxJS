@@ -34,7 +34,7 @@ export class Observable implements Subscribable{
 
 	public map (projection: Function) {
 		return Observable.create((next, error, complete) => {
-			let subscription = this.subscribe((data?: any) => projection(next(data)), error, complete);
+			let subscription = this.subscribe((data?: any) => next(projection(data)), error, complete);
 			return () => {
 				subscription.unsubscribe();
 			}
@@ -43,7 +43,7 @@ export class Observable implements Subscribable{
 
 	public retry (maxRetries: number = -1) {
 		return Observable.create((next, error, complete) => {
-			let subscription = null;
+			let subscription;
 			let reSubscribe = (err?: Error) => {
 				if (subscription)
 					subscription.unsubscribe();
@@ -119,5 +119,19 @@ export class Observable implements Subscribable{
 			}
 		});
 
+	}
+
+	public distinctUntilChanged () {
+		return Observable.create((next, error, complete) => {
+			let register;
+			let subscription = this.subscribe((data?: any) => {
+				if (data !== register)
+					next(register = data);
+			}, error, complete);
+
+			return () => {
+				subscription.unsubscribe();
+			}
+		});
 	}
 }
