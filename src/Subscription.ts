@@ -5,9 +5,9 @@ export interface Subscriber {
 
 export class Subscription implements Subscriber {
 	public isUnsubscribed:boolean;
-	private destructor: () => any;
+	private destructor: (() => any) | void;
 
-	constructor(work:Worker, onNext:(data?:any) => void, onError = (err?:any) => {}, onComplete = () => {}) {
+	constructor(work:Worker, onNext:(data?:any) => any, onError = (err?:any) => {}, onComplete = () => {}) {
 		this.isUnsubscribed = false;
 
 		let completed = false;
@@ -40,7 +40,7 @@ export class Subscription implements Subscriber {
 	unsubscribe() {
 		if (!this.isUnsubscribed) {
 			if (this.destructor)
-				this.destructor();
+				(<() => any>this.destructor)();
 			this.isUnsubscribed = true;
 		}
 	}

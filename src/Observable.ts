@@ -1,9 +1,9 @@
 import {Subscription} from "./Subscription";
 
-export type Worker = (next:Function, error?:Function, complete?:Function) => Function;
+export type Worker = (next:(data?:any) => any|void, error?:(err?:any) => any|void, complete?:() => any|void) => (() => any)|void;
 
 interface Subscribable {
-	subscribe: (onNext:(data?:any) => void, onError?:(err?:any) => void, onComplete?:() => void) => Subscription;
+	subscribe: (onNext:(data?:any) => any, onError?:(err?:any) => any, onComplete?:() => any) => Subscription;
 }
 
 export class Observable implements Subscribable {
@@ -30,12 +30,12 @@ export class Observable implements Subscribable {
 	constructor(private work:Worker) {
 	}
 
-	public subscribe(onNext:(data?:any) => void, onError?:(err?:any) => void, onComplete?:() => void):any {
+	public subscribe(onNext:(data?:any) => any, onError?:(err?:any) => any, onComplete?:() => any):any {
 		return new Subscription(this.work, onNext, onError, onComplete);
 	}
 
 	public map(projection:Function) {
-		return Observable.create((next:(data?:any) => void, error:(err?:any) => void, complete:() => void) => {
+		return Observable.create((next:(data?:any) => any, error:(err?:any) => any, complete:() => any) => {
 			let subscription = this.subscribe((data?:any) => next(projection(data)), error, complete);
 			return () => {
 				subscription.unsubscribe();
@@ -44,7 +44,7 @@ export class Observable implements Subscribable {
 	}
 
 	public retry(maxRetries:number = -1) {
-		return Observable.create((next:(data?:any) => void, error:(err?:any) => void, complete:() => void) => {
+		return Observable.create((next:(data?:any) => any, error:(err?:any) => any, complete:() => any) => {
 			let subscription:Subscription;
 			let reSubscribe = (err?:Error) => {
 				if (subscription)
@@ -67,7 +67,7 @@ export class Observable implements Subscribable {
 	}
 
 	public flatMap(projection:Function) {
-		return Observable.create((next:(data?:any) => void, error:(err?:any) => void, complete:() => void) => {
+		return Observable.create((next:(data?:any) => any, error:(err?:any) => any, complete:() => any) => {
 			let innerSubscriptions:Array<Subscription> = [];
 			let subscription = this.subscribe((data?:any) => {
 				let innerSubscription = projection(data).subscribe(next, error, () => {
@@ -86,7 +86,7 @@ export class Observable implements Subscribable {
 	}
 
 	public exhaustMap(projection:Function) {
-		return Observable.create((next:(data?:any) => void, error:(err?:any) => void, complete:() => void) => {
+		return Observable.create((next:(data?:any) => any, error:(err?:any) => any, complete:() => any) => {
 			let innerSubscription:Subscription;
 			let subscription = this.subscribe((data?:any) => {
 				if (!innerSubscription || innerSubscription.isUnsubscribed)
@@ -124,7 +124,7 @@ export class Observable implements Subscribable {
 	}
 
 	public distinctUntilChanged() {
-		return Observable.create((next:(data?:any) => void, error:(err?:any) => void, complete:() => void) => {
+		return Observable.create((next:(data?:any) => any, error:(err?:any) => any, complete:() => any) => {
 			let register:any;
 			let subscription = this.subscribe((data?:any) => {
 				if (data !== register)

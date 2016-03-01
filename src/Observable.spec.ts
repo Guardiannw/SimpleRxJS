@@ -5,7 +5,7 @@ describe('Observable', () => {
 	});
 
 	it('should unsubscribe when completed', () => {
-		let subscription = Observable.create((next: (data?: any) => void, error: (err?: any) => void, complete: () => void) => {
+		let subscription = Observable.create((next: (data?: any) => any, error: (err?: any) => any, complete: () => any) => {
 			complete();
 			return () => { };
 		}).subscribe(() => {});
@@ -13,7 +13,7 @@ describe('Observable', () => {
 	});
 
 	it('should unsubscribe when completed', () => {
-		let subscription = Observable.create((next: (data?: any) => void, error: (err?: any) => void, complete: () => void) => {
+		let subscription = Observable.create((next: (data?: any) => any, error: (err?: any) => any, complete: () => any) => {
 			error();
 			return () => { };
 		}).subscribe(() => {}, () => {
@@ -23,7 +23,7 @@ describe('Observable', () => {
 	});
 
 	it('should stop emitting values once an error has occurred', () => {
-		let map = [];
+		let map: Array<number> = [];
 		Observable.create((next, error, complete) => {
 			next(1);
 			next(2);
@@ -38,7 +38,7 @@ describe('Observable', () => {
 	});
 
 	it('should stop emitting values once it has completed', () => {
-		let map = [];
+		let map: Array<number> = [];
 		Observable.create((next, error, complete) => {
 			next(1);
 			next(2);
@@ -54,13 +54,13 @@ describe('Observable', () => {
 
 	describe('operator map', () => {
 		it('should map appropriately', () => {
-			let map = [];
+			let map: Array<number> = [];
 			Observable.create((next, error, complete) => {
 				next(1);
 				next(2);
 				next(3);
 				complete();
-			}).map(x => x * 2)
+			}).map((x: number) => x * 2)
 				.subscribe(map.push.bind(map));
 
 			expect(map[0]).toEqual(2);
@@ -71,7 +71,7 @@ describe('Observable', () => {
 
 	describe('operator distinctUntilChanged', () => {
 		it('should only call next when the data has changed', () => {
-			let map = [];
+			let map: Array<number> = [];
 			Observable.create((next, error, complete) => {
 				next(1);
 				next(1);
@@ -93,7 +93,7 @@ describe('Observable', () => {
 	describe('operator retry', () => {
 		it('should retry a set amount of times if the subscription calls error', () => {
 			let iterator = 1;
-			let map = [];
+			let map: Array<number> = [];
 
 			Observable.create((next, error, complete) => {
 				next(iterator++);
@@ -113,11 +113,11 @@ describe('Observable', () => {
 
 	describe('operator flatmap', () => {
 		it('should join multiple the output of multiple observables from a single observable', () => {
-			function createMappingObservable(number) {
+			function createMappingObservable(number: number) {
 				return Observable.create((next) => { next(number * 2); });
 			}
 
-			let map = [];
+			let map: Array<number> = [];
 			Observable.create((next, error, complete) => {
 				next(1);
 				next(2);
