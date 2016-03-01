@@ -1,5 +1,6 @@
 var path = require('path');
 var gulp = require('gulp');
+var sourcemaps = require('gulp-sourcemaps');
 var ts = require('gulp-typescript');
 var tsConfig = {
 	noImplicitAny: true,
@@ -13,13 +14,17 @@ var tsConfig = {
 gulp.task('develop', ['build'], function () {
 	gulp.watch('src/**/*.*', function () {
 		gulp.src('src/**/*.*')
+			.pipe(sourcemaps.init())
 			.pipe(ts(tsConfig))
+			.pipe(sourcemaps.write())
 			.pipe(gulp.dest('dist'));
 	});
 });
 
 gulp.task('build', function () {
 	gulp.src('src/**/*.*')
+		.pipe(sourcemaps.init())
 		.pipe(ts(tsConfig))
+		.pipe(sourcemaps.write())
 		.pipe(gulp.dest('dist'));
 });

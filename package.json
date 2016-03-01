@@ -28,6 +28,7 @@
   "homepage": "https://github.com/Guardiannw/SimpleRxJS#readme",
   "devDependencies": {
     "gulp": "^3.9.1",
+    "gulp-sourcemaps": "^1.6.0",
     "gulp-typescript": "^2.12.0",
     "jasmine-core": "^2.4.1",
     "jasmine-reporters": "^2.1.1",
@@ -35,10 +36,10 @@
     "karma-chrome-launcher": "^0.2.2",
     "karma-jasmine": "^0.3.7",
     "karma-junit-reporter": "^0.3.8",
+    "karma-systemjs": "^0.12.0",
     "systemjs": "^0.19.23",
     "typescript": "^1.8.2",
     "typings": "^0.6.8"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }

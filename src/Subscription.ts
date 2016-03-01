@@ -1,17 +1,46 @@
+import {Worker} from './Observable';
 export interface Subscriber {
 	unsubscribe: Function;
 }
 
-export class Subscription implements Subscriber{
-	public isUnsubscribed: boolean;
+export class Subscription implements Subscriber {
+	public isUnsubscribed:boolean;
+	private destructor: () => any;
 
-	constructor (private destructor: Function) {
+	constructor(work:Worker, onNext:(data?:any) => void, onError = (err?:any) => {}, onComplete = () => {}) {
 		this.isUnsubscribed = false;
+
+		let completed = false;
+		let unsubscribedBeforeCompleted = false;
+		this.destructor = work((data?:any) => {
+			if (!this.isUnsubscribed && !unsubscribedBeforeCompleted)
+				onNext(data);
+		}, (err?:any) => {
+			if (!this.isUnsubscribed && !unsubscribedBeforeCompleted) {
+				if (!completed)
+					unsubscribedBeforeCompleted = true;
+				else
+					this.unsubscribe();
+			}
+			onError(err);
+		}, () => {
+			if (!this.isUnsubscribed && !unsubscribedBeforeCompleted) {
+				if (!completed)
+					unsubscribedBeforeCompleted = true;
+				else
+					this.unsubscribe();
+			}
+			onComplete();
+		});
+		completed = true;
+		if (unsubscribedBeforeCompleted)
+			this.unsubscribe();
 	}
 
-	unsubscribe () {
+	unsubscribe() {
 		if (!this.isUnsubscribed) {
-			this.destructor();
+			if (this.destructor)
+				this.destructor();
 			this.isUnsubscribed = true;
 		}
 	}

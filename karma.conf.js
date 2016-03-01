@@ -9,11 +9,26 @@ module.exports = function (config) {
 
 		// frameworks to use
 		// available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-		frameworks: ['jasmine'],
+		frameworks: ['systemjs', 'jasmine'],
+		plugins: ['karma-jasmine', 'karma-chrome-launcher', 'karma-systemjs'],
+
+		systemjs: {
+			baseURL: '',
+			config: {
+				transpiler: null,
+				defaultJSExtensions: true,
+				paths: {
+					systemjs: 'node_modules/systemjs/dist/system.js'
+				}
+			},
+			serveFiles: ['dist/*.js'],
+			testFileSuffix: '.spec.js'
+		},
 
 		// list of files / patterns to load in the browser
-		files: [],
-
+		files: [
+			'dist/*.spec.js'
+		],
 
 		// list of files to exclude
 		exclude: [],
