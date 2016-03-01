@@ -136,4 +136,50 @@ export class Observable implements Subscribable {
 			}
 		});
 	}
+
+	public startWith(value: any) {
+		return Observable.create((next, error, complete) => {
+			// Emit the first value
+			next(value);
+
+			let subscription = this.subscribe(next, error, complete);
+
+			return () => {
+				subscription.unsubscribe();
+			}
+		});
+	}
+
+	public delay(timeout: number) {
+		return Observable.create((next, error, complete) => {
+			let subscription;
+			let timeoutId = setTimeout(() => {
+				subscription = this.subscribe(next, error, complete);
+			}, timeout);
+
+			return () => {
+				clearTimeout(timeoutId);
+				if (subscription)
+					subscription.unsubscribe();
+			}
+		});
+	}
+
+	//TODO: Figure out how to implement this
+	//public retryWhen(projection:Function) {
+	//	return Observable.create((next, error, complete) => {
+	//		let subscription:Subscription;
+	//		let reSubscribe = () => {
+	//			if (subscription)
+	//				subscription.unsubscribe();
+	//			subscription = projection(this).subscribe(next, reSubscribe, complete);
+	//		};
+	//
+	//		subscription = this.subscribe(next, reSubscribe, complete);
+	//
+	//		return () => {
+	//			subscription.unsubscribe();
+	//		}
+	//	});
+	//}
 }

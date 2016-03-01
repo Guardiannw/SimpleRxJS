@@ -2,13 +2,15 @@
 import {Observable} from './Observable';
 describe('Observable', () => {
 	describe('Interval', () => {
+		//TODO: Implement This
 	});
 
 	it('should unsubscribe when completed', () => {
 		let subscription = Observable.create((next, error, complete) => {
 			complete();
 			return () => { };
-		}).subscribe(() => {});
+		}).subscribe(() => {
+		});
 		expect(subscription.isUnsubscribed).toBeTruthy();
 	});
 
@@ -16,12 +18,13 @@ describe('Observable', () => {
 		let subscription = Observable.create((next, error) => {
 			error();
 			return () => { };
-		}).subscribe(() => {});
+		}).subscribe(() => {
+		});
 		expect(subscription.isUnsubscribed).toBeTruthy();
 	});
 
 	it('should stop emitting values once an error has occurred', () => {
-		let map: Array<number> = [];
+		let map:Array<number> = [];
 		Observable.create((next, error) => {
 			next(1);
 			next(2);
@@ -36,7 +39,7 @@ describe('Observable', () => {
 	});
 
 	it('should stop emitting values once it has completed', () => {
-		let map: Array<number> = [];
+		let map:Array<number> = [];
 		Observable.create((next, error, complete) => {
 			next(1);
 			next(2);
@@ -50,82 +53,136 @@ describe('Observable', () => {
 		expect(map[1]).toEqual(2);
 	});
 
-	describe('operator map', () => {
-		it('should map appropriately', () => {
-			let map: Array<number> = [];
-			Observable.create((next, error, complete) => {
-				next(1);
-				next(2);
-				next(3);
-				complete();
-			}).map((x: number) => x * 2)
-				.subscribe(map.push.bind(map));
+	describe('Operators', () => {
+		describe('map', () => {
+			it('should map appropriately', () => {
+				let map:Array<number> = [];
+				Observable.create((next, error, complete) => {
+					next(1);
+					next(2);
+					next(3);
+					complete();
+				}).map((x:number) => x * 2)
+					.subscribe(map.push.bind(map));
 
-			expect(map[0]).toEqual(2);
-			expect(map[1]).toEqual(4);
-			expect(map[2]).toEqual(6);
+				expect(map[0]).toEqual(2);
+				expect(map[1]).toEqual(4);
+				expect(map[2]).toEqual(6);
+			});
 		});
-	});
 
-	describe('operator distinctUntilChanged', () => {
-		it('should only call next when the data has changed', () => {
-			let map: Array<number> = [];
-			Observable.create((next) => {
-				next(1);
-				next(1);
-				next(2);
-				next(3);
-				next(2);
-				next(4);
-			}).distinctUntilChanged()
-			.subscribe(map.push.bind(map));
+		describe('distinctUntilChanged', () => {
+			it('should only call next when the data has changed', () => {
+				let map:Array<number> = [];
+				Observable.create((next, error, complete) => {
+					next(1);
+					next(1);
+					next(2);
+					next(3);
+					next(2);
+					next(4);
+					complete();
+				}).distinctUntilChanged()
+					.subscribe(map.push.bind(map));
 
-			expect(map[0]).toEqual(1);
-			expect(map[1]).toEqual(2);
-			expect(map[2]).toEqual(3);
-			expect(map[3]).toEqual(2);
-			expect(map[4]).toEqual(4);
+				expect(map[0]).toEqual(1);
+				expect(map[1]).toEqual(2);
+				expect(map[2]).toEqual(3);
+				expect(map[3]).toEqual(2);
+				expect(map[4]).toEqual(4);
+			});
 		});
-	});
 
-	describe('operator retry', () => {
-		it('should retry a set amount of times if the subscription calls error', () => {
-			let iterator = 1;
-			let map: Array<number> = [];
+		describe('retry', () => {
+			it('should retry a set amount of times if the subscription calls error', () => {
+				let iterator = 1;
+				let map:Array<number> = [];
 
-			Observable.create((next, error) => {
-				next(iterator++);
-				error();
-			}).retry(5)
-			.subscribe(map.push.bind(map));
+				Observable.create((next, error) => {
+					next(iterator++);
+					error();
+				}).retry(5)
+					.subscribe(map.push.bind(map));
 
-			expect(map.length).toEqual(6);
-			expect(map[0]).toEqual(1);
-			expect(map[1]).toEqual(2);
-			expect(map[2]).toEqual(3);
-			expect(map[3]).toEqual(4);
-			expect(map[4]).toEqual(5);
-			expect(map[5]).toEqual(6);
+				expect(map.length).toEqual(6);
+				expect(map[0]).toEqual(1);
+				expect(map[1]).toEqual(2);
+				expect(map[2]).toEqual(3);
+				expect(map[3]).toEqual(4);
+				expect(map[4]).toEqual(5);
+				expect(map[5]).toEqual(6);
+			});
 		});
-	});
 
-	describe('operator flatmap', () => {
-		it('should join multiple the output of multiple observables from a single observable', () => {
-			function createMappingObservable(number: number) {
-				return Observable.create((next) => { next(number * 2); });
-			}
+		describe('flatmap', () => {
+			it('should join multiple the output of multiple observables from a single observable', () => {
+				function createMappingObservable(number:number) {
+					return Observable.create((next) => {
+						next(number * 2);
+					});
+				}
 
-			let map: Array<number> = [];
-			Observable.create((next) => {
-				next(1);
-				next(2);
-				next(3);
-			}).flatMap(createMappingObservable)
-			.subscribe(map.push.bind(map));
+				let map:Array<number> = [];
+				Observable.create((next, error, complete) => {
+					next(1);
+					next(2);
+					next(3);
+					complete();
+				}).flatMap(createMappingObservable)
+					.subscribe(map.push.bind(map));
 
-			expect(map[0]).toEqual(2);
-			expect(map[1]).toEqual(4);
-			expect(map[2]).toEqual(6);
+				expect(map[0]).toEqual(2);
+				expect(map[1]).toEqual(4);
+				expect(map[2]).toEqual(6);
+			});
 		});
+
+		describe('startWith', () => {
+			it('should emit the value provided before any others', () => {
+				let map:Array<number> = [];
+				Observable.create((next) => {
+					next(2);
+					next(3);
+				}).startWith(1)
+					.subscribe(map.push.bind(map));
+
+				expect(map.length).toEqual(3);
+				expect(map[0]).toEqual(1);
+				expect(map[1]).toEqual(2);
+				expect(map[2]).toEqual(3);
+			});
+		});
+
+		describe ('delay', () => {
+			beforeEach(() => {
+				jasmine.clock().install();
+			});
+
+			it('should begin emitting items after a certain time delay', (done) => {
+				let map: Array<number> = [];
+
+				function doneCheck () {
+					expect(map.length).toEqual(3);
+					expect(map[0]).toEqual(1);
+					expect(map[1]).toEqual(2);
+					expect(map[2]).toEqual(3);
+					done();
+				}
+
+				Observable.create((next, error, complete) => {
+					next(1);
+					next(2);
+					next(3);
+					complete();
+				}).delay(200)
+				.subscribe(map.push.bind(map), () => {}, doneCheck);
+
+				expect(map.length).toEqual(0);
+
+				jasmine.clock().tick(200);
+			});
+		});
+
 	});
 });
+
