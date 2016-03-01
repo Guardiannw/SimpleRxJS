@@ -7,15 +7,15 @@ export class Subscription implements Subscriber {
 	public isUnsubscribed:boolean;
 	private destructor: (() => any) | void;
 
-	constructor(work:Worker, onNext:(data?:any) => any, onError = (err?:any) => {}, onComplete = () => {}) {
+	constructor(work:Worker, onNext:(data?: any) => any|void, onError: (err?: any) => any|void = (err) => {}, onComplete: () => any|void = () => {}) {
 		this.isUnsubscribed = false;
 
 		let completed = false;
 		let unsubscribedBeforeCompleted = false;
-		this.destructor = work((data?:any) => {
+		this.destructor = work((data) => {
 			if (!this.isUnsubscribed && !unsubscribedBeforeCompleted)
 				onNext(data);
-		}, (err?:any) => {
+		}, (err) => {
 			if (!this.isUnsubscribed && !unsubscribedBeforeCompleted) {
 				if (!completed)
 					unsubscribedBeforeCompleted = true;

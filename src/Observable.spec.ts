@@ -5,26 +5,24 @@ describe('Observable', () => {
 	});
 
 	it('should unsubscribe when completed', () => {
-		let subscription = Observable.create((next: (data?: any) => any, error: (err?: any) => any, complete: () => any) => {
+		let subscription = Observable.create((next, error, complete) => {
 			complete();
 			return () => { };
 		}).subscribe(() => {});
 		expect(subscription.isUnsubscribed).toBeTruthy();
 	});
 
-	it('should unsubscribe when completed', () => {
-		let subscription = Observable.create((next: (data?: any) => any, error: (err?: any) => any, complete: () => any) => {
+	it('should unsubscribe when errored', () => {
+		let subscription = Observable.create((next, error) => {
 			error();
 			return () => { };
-		}).subscribe(() => {}, () => {
-			expect(this.isUnsubscribed).toBeFalsy();
-		}, () => {});
+		}).subscribe(() => {});
 		expect(subscription.isUnsubscribed).toBeTruthy();
 	});
 
 	it('should stop emitting values once an error has occurred', () => {
 		let map: Array<number> = [];
-		Observable.create((next, error, complete) => {
+		Observable.create((next, error) => {
 			next(1);
 			next(2);
 			error();
@@ -72,7 +70,7 @@ describe('Observable', () => {
 	describe('operator distinctUntilChanged', () => {
 		it('should only call next when the data has changed', () => {
 			let map: Array<number> = [];
-			Observable.create((next, error, complete) => {
+			Observable.create((next) => {
 				next(1);
 				next(1);
 				next(2);
@@ -95,7 +93,7 @@ describe('Observable', () => {
 			let iterator = 1;
 			let map: Array<number> = [];
 
-			Observable.create((next, error, complete) => {
+			Observable.create((next, error) => {
 				next(iterator++);
 				error();
 			}).retry(5)
@@ -118,7 +116,7 @@ describe('Observable', () => {
 			}
 
 			let map: Array<number> = [];
-			Observable.create((next, error, complete) => {
+			Observable.create((next) => {
 				next(1);
 				next(2);
 				next(3);
