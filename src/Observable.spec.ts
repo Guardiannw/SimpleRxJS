@@ -54,6 +54,14 @@ describe('Observable', () => {
 	});
 
 	describe('Operators', () => {
+		beforeEach(() => {
+			jasmine.clock().install();
+		});
+
+		afterEach(() => {
+			jasmine.clock().uninstall();
+		});
+
 		describe('map', () => {
 			it('should map appropriately', () => {
 				let map:Array<number> = [];
@@ -135,6 +143,99 @@ describe('Observable', () => {
 				expect(map[1]).toEqual(4);
 				expect(map[2]).toEqual(6);
 			});
+
+			it('should continue to emit from mapped observable even after parent has completed', () => {
+				let map: Array<number> = [];
+
+				function createDelayObservable(number: number) {
+					return Observable.create((next, error, complete) => {
+						let id = setTimeout(() => {
+							next(number * 2);
+							complete();
+						}, 100);
+						return () => {
+							clearTimeout(id);
+						}
+					});
+				}
+
+				Observable.create((next, error, complete) => {
+					next(1);
+					next(2);
+					next(3);
+					complete();
+				}).flatMap((x: number) => createDelayObservable(x))
+				.subscribe(map.push.bind(map));
+
+				jasmine.clock().tick(100);
+
+				expect(map.length).toEqual(3);
+				expect(map[0]).toEqual(2);
+				expect(map[1]).toEqual(4);
+				expect(map[2]).toEqual(6);
+			});
+		});
+
+		describe('switchMap', () => {
+			it('should switch to a new observable mapping and unsubscribe from the existing mapping', () => {
+				let map: Array<number> = [];
+
+				function createDelayObservable(number: number) {
+					return Observable.create((next, error, complete) => {
+						let id = setTimeout(() => {
+							next(number * 2);
+							complete();
+						}, 100);
+						return () => {
+							clearTimeout(id);
+						}
+					});
+				}
+
+				Observable.create((next, error, complete) => {
+					next(1);
+					next(2);
+					next(3);
+					complete();
+				}).switchMap((x: number) => createDelayObservable(x))
+					.subscribe(map.push.bind(map));
+
+				jasmine.clock().tick(100);
+
+				expect(map.length).toEqual(1);
+				expect(map[0]).toEqual(6);
+			});
+		});
+
+		describe('exhaustMap', () => {
+			it('should ignore all new observable mappings until after the current mapping is complete', () => {
+				let map: Array<number> = [];
+
+				function createDelayObservable(number: number) {
+					return Observable.create((next, error, complete) => {
+						let id = setTimeout(() => {
+							next(number * 2);
+							complete();
+						}, 100);
+						return () => {
+							clearTimeout(id);
+						}
+					});
+				}
+
+				Observable.create((next, error, complete) => {
+					next(1);
+					next(2);
+					next(3);
+					complete();
+				}).exhaustMap((x: number) => createDelayObservable(x))
+				.subscribe(map.push.bind(map));
+
+				jasmine.clock().tick(100);
+
+				expect(map.length).toEqual(1);
+				expect(map[0]).toEqual(2);
+			});
 		});
 
 		describe('startWith', () => {
@@ -154,20 +255,8 @@ describe('Observable', () => {
 		});
 
 		describe ('delay', () => {
-			beforeEach(() => {
-				jasmine.clock().install();
-			});
-
-			it('should begin emitting items after a certain time delay', (done) => {
+			it('should begin emitting items after a certain time delay', () => {
 				let map: Array<number> = [];
-
-				function doneCheck () {
-					expect(map.length).toEqual(3);
-					expect(map[0]).toEqual(1);
-					expect(map[1]).toEqual(2);
-					expect(map[2]).toEqual(3);
-					done();
-				}
 
 				Observable.create((next, error, complete) => {
 					next(1);
@@ -175,11 +264,16 @@ describe('Observable', () => {
 					next(3);
 					complete();
 				}).delay(200)
-				.subscribe(map.push.bind(map), () => {}, doneCheck);
+				.subscribe(map.push.bind(map));
 
 				expect(map.length).toEqual(0);
 
 				jasmine.clock().tick(200);
+
+				expect(map.length).toEqual(3);
+				expect(map[0]).toEqual(1);
+				expect(map[1]).toEqual(2);
+				expect(map[2]).toEqual(3);
 			});
 		});
 

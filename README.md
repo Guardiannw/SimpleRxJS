@@ -1,4 +1,4 @@
-# SimpleRxJS
+# SimpleRxJS [![Build Status](https://travis-ci.org/Guardiannw/SimpleRxJS.svg?branch=master)](https://travis-ci.org/Guardiannw/SimpleRxJS)
 A Simpler RxJS
 
 ## GOALS ##

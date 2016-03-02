@@ -7,3 +7,6 @@ typings/
 
 # Builds / Compilations
 dist/
+
+# Error Files
+npm-debug.log

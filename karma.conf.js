@@ -10,7 +10,7 @@ module.exports = function (config) {
 		// frameworks to use
 		// available frameworks: https://npmjs.org/browse/keyword/karma-adapter
 		frameworks: ['systemjs', 'jasmine'],
-		plugins: ['karma-jasmine', 'karma-chrome-launcher', 'karma-systemjs'],
+		plugins: ['karma-jasmine', 'karma-chrome-launcher', 'karma-firefox-launcher', 'karma-systemjs'],
 
 		systemjs: {
 			baseURL: '',

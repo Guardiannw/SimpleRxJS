@@ -3,3 +3,6 @@
 
 # Package Dependencies
 node_modules/
+
+# Error Files
+npm-debug.log

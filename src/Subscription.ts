@@ -4,11 +4,13 @@ export interface Subscriber {
 }
 
 export class Subscription implements Subscriber {
-	public isUnsubscribed:boolean;
+	public isUnsubscribed: boolean;
+	public isCompleted: boolean;
 	private destructor: (() => any) | void;
 
 	constructor(work:Worker, onNext:(data?: any) => any|void, onError: (err?: any) => any|void = (err) => {}, onComplete: () => any|void = () => {}) {
 		this.isUnsubscribed = false;
+		this.isCompleted = false;
 
 		let completed = false;
 		let unsubscribedBeforeCompleted = false;
@@ -24,6 +26,8 @@ export class Subscription implements Subscriber {
 			}
 			onError(err);
 		}, () => {
+			this.isCompleted = true;
+
 			if (!this.isUnsubscribed && !unsubscribedBeforeCompleted) {
 				if (!completed)
 					unsubscribedBeforeCompleted = true;
