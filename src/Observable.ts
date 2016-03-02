@@ -73,9 +73,14 @@ export class Observable implements Subscribable {
 				let innerSubscription = projection(data).subscribe(next, error, () => {
 					innerSubscription.unsubscribe();
 					innerSubscriptions.splice(innerSubscriptions.indexOf(innerSubscription), 1);
+					if (innerSubscriptions.filter((innerSub) => !innerSub.isCompleted).length === 0)
+						complete();
 				});
 				innerSubscriptions.push(innerSubscription);
-			}, error, complete);
+			}, error, () => {
+				if (innerSubscriptions.filter((innerSub) => !innerSub.isCompleted).length === 0)
+					complete();
+			});
 
 			return () => {
 				subscription.unsubscribe();
@@ -89,11 +94,18 @@ export class Observable implements Subscribable {
 		return Observable.create((next, error, complete) => {
 			let innerSubscription:Subscription;
 			let subscription = this.subscribe((data) => {
-				if (!innerSubscription || innerSubscription.isUnsubscribed)
+				if (!innerSubscription || innerSubscription.isUnsubscribed) {
 					innerSubscription = projection(data).subscribe(next, error, () => {
-						innerSubscription.unsubscribe();
+						if (subscription && subscription.isCompleted)
+							complete();
+						else
+							innerSubscription.unsubscribe();
 					});
-			}, error, complete);
+				}
+			}, error, () => {
+				if (innerSubscription.isCompleted)
+					complete();
+			});
 
 			return () => {
 				subscription.unsubscribe();
@@ -110,9 +122,15 @@ export class Observable implements Subscribable {
 				if (innerSubscription && !innerSubscription.isUnsubscribed)
 					innerSubscription.unsubscribe();
 				innerSubscription = projection(data).subscribe(next, error, () => {
-					innerSubscription.unsubscribe();
+					if (subscription && subscription.isCompleted)
+						complete();
+					else
+						innerSubscription.unsubscribe();
 				});
-			}, error, complete);
+			}, error, () => {
+				if (innerSubscription.isCompleted)
+					complete();
+			});
 
 			return () => {
 				subscription.unsubscribe();
