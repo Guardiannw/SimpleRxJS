@@ -5,7 +5,7 @@ var ts = require('gulp-typescript');
 var tsConfig = {
 	noImplicitAny: true,
 	target: 'ES5',
-	module: 'system',
+	module: 'commonjs',
 	moduleResolution: 'node',
 	experimentalDecorators: true,
 	typescript: require('typescript')

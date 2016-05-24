@@ -6,45 +6,43 @@ export interface Subscriber {
 export class Subscription implements Subscriber {
 	public isUnsubscribed: boolean;
 	public isCompleted: boolean;
-	private destructor: (() => any) | void;
+	private destructorPromise: Promise;
 
-	constructor(work:Worker, onNext:(data?: any) => any|void, onError: (err?: any) => any|void = (err) => {}, onComplete: () => any|void = () => {}) {
+	constructor(work:Worker, onNext:(data?: any) => any|void, onError: (err?: any) => any|void, onComplete: () => any|void) {
 		this.isUnsubscribed = false;
 		this.isCompleted = false;
-
-		let completed = false;
-		let unsubscribedBeforeCompleted = false;
-		this.destructor = work((data) => {
-			if (!this.isUnsubscribed && !unsubscribedBeforeCompleted)
-				onNext(data);
-		}, (err) => {
-			if (!this.isUnsubscribed && !unsubscribedBeforeCompleted) {
-				if (!completed)
-					unsubscribedBeforeCompleted = true;
-				else
-					this.unsubscribe();
-			}
-			onError(err);
-		}, () => {
-			this.isCompleted = true;
-
-			if (!this.isUnsubscribed && !unsubscribedBeforeCompleted) {
-				if (!completed)
-					unsubscribedBeforeCompleted = true;
-				else
-					this.unsubscribe();
-			}
-			onComplete();
+		
+		this.destructorPromise = new Promise((resolve) => {
+			setTimeout(() => {
+				resolve(work((data) => {
+					if (!this.isUnsubscribed)
+						if (onNext)
+							onNext(data);
+				}, (err) => {
+					if (!this.isUnsubscribed) {
+						this.unsubscribe();
+						if (onError)
+							onError(err);
+					}
+				}, () => {
+					if (!this.isUnsubscribed) {
+						this.unsubscribe();
+						if (onComplete)
+							onComplete();
+					}
+					this.isCompleted = true;
+				}));
+			}, 0);
 		});
-		completed = true;
-		if (unsubscribedBeforeCompleted)
-			this.unsubscribe();
 	}
 
 	unsubscribe() {
 		if (!this.isUnsubscribed) {
-			if (this.destructor)
-				(<() => any>this.destructor)();
+			this.destructorPromise
+				.then((destructor) => {
+					if (destructor)
+						destructor();
+				});
 			this.isUnsubscribed = true;
 		}
 	}
